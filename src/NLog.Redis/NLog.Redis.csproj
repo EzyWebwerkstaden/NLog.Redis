@@ -32,16 +32,23 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="NLog">
       <HintPath>..\packages\NLog.3.1.0.0\lib\net45\NLog.dll</HintPath>
     </Reference>
-    <Reference Include="StackExchange.Redis">
-      <HintPath>..\packages\StackExchange.Redis.1.0.371\lib\net45\StackExchange.Redis.dll</HintPath>
+    <Reference Include="StackExchange.Redis.StrongName">
+      <HintPath>..\packages\StackExchange.Redis.StrongName.1.0.371\lib\net45\StackExchange.Redis.StrongName.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Field.cs" />
+    <Compile Include="LogLine.cs" />
+    <Compile Include="MessageFormatter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RedisConnectionManager.cs" />
     <Compile Include="RedisTarget.cs" />

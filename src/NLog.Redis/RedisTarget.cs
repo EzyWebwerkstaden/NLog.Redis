@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using NLog.Common;
 using NLog.Config;
+using NLog.Redis;
 
 namespace NLog.Targets
 {
@@ -8,6 +11,8 @@ namespace NLog.Targets
     {
         protected const string ListDataType = "list";
         protected const string ChannelDataType = "channel";
+
+ 
 
         /// <summary>
         /// Sets the host name or IP Address of the redis server
@@ -43,10 +48,14 @@ namespace NLog.Targets
         /// </summary>
         public string Password { get; set; }
 
+        [ArrayParameter(typeof(Field), "field")]
+        public IList<Field> Fields { get; private set; }
+
         private RedisConnectionManager _redisConnectionManager;
 
         public RedisTarget()
         {
+            Fields = new List<Field>();
         }
 
         protected override void InitializeTarget()
@@ -68,32 +77,39 @@ namespace NLog.Targets
 
         protected override void Write(LogEventInfo logEvent)
         {
-            var message = this.Layout.Render(logEvent);
+            var uncompressedMessage = GetMessage(logEvent);
+
+
             var redisDatabase = _redisConnectionManager.GetDatabase();
             switch (DataType.ToLower())
             {
                 case ListDataType:
-                    redisDatabase.ListRightPush(Key, message);
+                    redisDatabase.ListRightPush(Key, uncompressedMessage);
                     break;
                 case ChannelDataType:
-                    redisDatabase.Publish(Key, message);
+                    redisDatabase.Publish(Key, uncompressedMessage);
                     break;
                 default:
                     throw new Exception("no data type defined for redis");
             }
         }
 
+        private string GetMessage(LogEventInfo info)
+        {
+            return MessageFormatter.GetMessageInner(true, Layout, info, this.Fields);
+        }
+
         protected override void Write(Common.AsyncLogEventInfo logEvent)
         {
-            var message = this.Layout.Render(logEvent.LogEvent);
+            var uncompressedMessage = GetMessage(logEvent.LogEvent);
             var redisDatabase = _redisConnectionManager.GetDatabase();
             switch (DataType.ToLower())
             {
                 case ListDataType:
-                    redisDatabase.ListRightPushAsync(Key, message);
+                    redisDatabase.ListRightPushAsync(Key, uncompressedMessage);
                     break;
                 case ChannelDataType:
-                    redisDatabase.PublishAsync(Key, message);
+                    redisDatabase.PublishAsync(Key, uncompressedMessage);
                     break;
                 default:
                     throw new Exception("no data type defined for redis");
